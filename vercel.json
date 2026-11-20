@@ -1,6 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "npm ci && npm run build",
+  "name": "z-space-3d",
+  "buildCommand": "npm run build",
   "outputDirectory": ".next",
-  "installCommand": "npm install --legacy-peer-deps"
+  "framework": "nextjs",
+  "installCommand": "npm install --legacy-peer-deps --ignore-scripts"
 }
