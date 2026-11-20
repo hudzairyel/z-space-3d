@@ -901,7 +901,27 @@ export default function WorkspacePage() {
       }
 
       if (type === "obj") {
-        downloadBlob(new Blob([exportToOBJ(geom)], { type: "text/plain" }), "obj");
+        const canvas = document.createElement("canvas");
+        canvas.width = canvas.height = 2048;
+        const ctx = canvas.getContext("2d")!;
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, 2048, 2048);
+        const scale = 2048 / Math.max(img.naturalWidth || img.width, img.naturalHeight || img.height);
+        const dw = (img.naturalWidth || img.width) * scale;
+        const dh = (img.naturalHeight || img.height) * scale;
+        ctx.drawImage(img, (2048 - dw) / 2, (2048 - dh) / 2, dw, dh);
+        
+        const result = exportToOBJ(geom, canvas);
+        downloadBlob(new Blob([result.obj], { type: "text/plain" }), "obj");
+        
+        if (result.texture) {
+          const blobUrl = URL.createObjectURL(result.texture);
+          const a = document.createElement("a");
+          a.href = blobUrl;
+          a.download = "texture.png";
+          a.click();
+          URL.revokeObjectURL(blobUrl);
+        }
         return;
       }
 
@@ -988,93 +1008,9 @@ export default function WorkspacePage() {
   };
 
   const downloadFbx = () => {
-    if (!geometry) return;
-    const geom = geometry.clone();
-    geom.computeVertexNormals();
-    const pos = geom.attributes.position;
-    const nor = geom.attributes.normal;
-    const uv = geom.attributes.uv;
-    const idx = geom.index ? Array.from(geom.index.array) : null;
-    const triCount = idx ? idx.length / 3 : pos.count / 3;
-    const lines: string[] = [];
-    const p = (s: string) => lines.push(s);
-    p("; FBX 7.4.0 project file");
-    p("; Z-Space mesh + baked animation takes");
-    p("FBXHeaderExtension:  {");
-    p("\tFBXHeaderVersion: 1003");
-    p("\tFBXVersion: 7400");
-    p("}");
-    p("Definitions:  {");
-    p("\tVersion: 100");
-    p("\tCount: 2");
-    p("\tObjectType: \"Geometry\" { Count: 1 }");
-    p("\tObjectType: \"Model\" { Count: 1 }");
-    p("}");
-    p("Objects:  {");
-    p("\tGeometry: 1000, \"Geometry::ZSpaceMesh\", \"Mesh\" {");
-    const verts: string[] = [];
-    for (let i = 0; i < pos.count; i++) verts.push(`${pos.getX(i)},${pos.getY(i)},${pos.getZ(i)}`);
-    p("\t\tVertices: *" + verts.length + " {");
-    p("\t\t\ta: " + verts.join(","));
-    p("\t\t}");
-    const polys: number[] = [];
-    for (let t = 0; t < triCount; t++) {
-      const a = idx ? idx[t * 3] : t * 3;
-      const b = idx ? idx[t * 3 + 1] : t * 3 + 1;
-      const c = idx ? idx[t * 3 + 2] : t * 3 + 2;
-      polys.push(a, b, ~(c));
-    }
-    p("\t\tPolygonVertexIndex: *" + polys.length + " {");
-    p("\t\t\ta: " + polys.join(","));
-    p("\t\t}");
-    if (nor) {
-      const ns: string[] = [];
-      const ni: number[] = [];
-      for (let i = 0; i < nor.count; i++) {
-        ns.push(`${nor.getX(i)},${nor.getY(i)},${nor.getZ(i)}`);
-        ni.push(i);
-      }
-      p("\t\tLayerElementNormal: 0 {");
-      p("\t\t\tVersion: 101");
-      p("\t\t\tMappingInformationType: \"ByVertice\"");
-      p("\t\t\tReferenceInformationType: \"Direct\"");
-      p("\t\t\tNormals: *" + ns.length + " { a: " + ns.join(",") + " }");
-      p("\t\t}");
-    }
-    if (uv) {
-      const us: string[] = [];
-      for (let i = 0; i < uv.count; i++) us.push(`${uv.getX(i)},${uv.getY(i)}`);
-      p("\t\tLayerElementUV: 0 {");
-      p("\t\t\tVersion: 101");
-      p("\t\t\tName: \"UVMap\"");
-      p("\t\t\tMappingInformationType: \"ByVertice\"");
-      p("\t\t\tReferenceInformationType: \"Direct\"");
-      p("\t\t\tUV: *" + us.length + " { a: " + us.join(",") + " }");
-      p("\t\t}");
-    }
-    p("\t\tLayer: 0 {");
-    p("\t\t\tVersion: 100");
-    if (nor) p("\t\t\tLayerElement:  { Type: \"LayerElementNormal\" TypedIndex: 0 }");
-    if (uv) p("\t\t\tLayerElement:  { Type: \"LayerElementUV\" TypedIndex: 0 }");
-    p("\t\t}");
-    p("\t}");
-    p("\tModel: 2000, \"Model::ZSpaceMesh\", \"Mesh\" {");
-    p("\t\tVersion: 232");
-    p("\t\tProperties70:  {");
-    p("\t\t}");
-    p("\t}");
-    p("}");
-    p("Connections:  {");
-    p("\tC: \"OO\",2000,0");
-    p("\tC: \"OO\",1000,2000");
-    p("}");
-    const blob = new Blob([lines.join("\n")], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "model.fbx";
-    a.click();
-    URL.revokeObjectURL(url);
+    // Three.js has no native FBXExporter. Fallback to GLB (recommended) or OBJ
+    if (!geometry || !imageUrl) return;
+    download("glb");
   };
 
   const bgStyle =

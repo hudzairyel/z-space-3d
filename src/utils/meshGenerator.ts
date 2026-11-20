@@ -790,11 +790,13 @@ export function generateMeshFromImage(
 
 /* ─── 9. Export functions (unchanged) ───────────────────────────────────── */
 
-export function exportToOBJ(geometry: THREE.BufferGeometry): string {
+export function exportToOBJ(geometry: THREE.BufferGeometry, textureMap?: string | HTMLCanvasElement | ImageBitmap): { obj: string; texture?: Blob } {
   const pos = geometry.attributes.position;
   const normal = geometry.attributes.normal;
   const uv = geometry.attributes.uv;
   let obj = "# NPNH-style 3D Extruded Mesh\n";
+  obj += "mtl material.mtl\n";
+  obj += "usemtl material\n";
 
   for (let i = 0; i < pos.count; i++)
     obj += `v ${pos.getX(i).toFixed(4)} ${pos.getY(i).toFixed(4)} ${pos.getZ(i).toFixed(4)}\n`;
@@ -810,7 +812,35 @@ export function exportToOBJ(geometry: THREE.BufferGeometry): string {
     for (let i = 0; i < index.count; i += 3)
       obj += `f ${index.getX(i) + 1}/${index.getX(i) + 1}/${index.getX(i) + 1} ${index.getX(i + 1) + 1}/${index.getX(i + 1) + 1}/${index.getX(i + 1) + 1} ${index.getX(i + 2) + 1}/${index.getX(i + 2) + 1}/${index.getX(i + 2) + 1}\n`;
 
-  return obj;
+  let texture: Blob | undefined;
+  if (textureMap) {
+    let canvas: HTMLCanvasElement;
+    if (textureMap instanceof HTMLCanvasElement) {
+      canvas = textureMap;
+    } else if (textureMap instanceof ImageBitmap) {
+      canvas = document.createElement("canvas");
+      canvas.width = textureMap.width;
+      canvas.height = textureMap.height;
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(textureMap, 0, 0);
+    } else {
+      // data URL or string
+      const img = new Image();
+      img.src = textureMap;
+      canvas = document.createElement("canvas");
+      canvas.width = img.naturalWidth || 2048;
+      canvas.height = img.naturalHeight || 2048;
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(img, 0, 0);
+    }
+    
+    const mtl = `# NPNH-style 3D Material\nnewmtl material\nKd 1.0 1.0 1.0\nmap_Kd texture.png\n`;
+    
+    texture = new Blob([canvas.toDataURL("image/png")], { type: "image/png" });
+    obj += `\n# MTL\n${mtl}\n`;
+  }
+
+  return { obj, texture };
 }
 
 export function exportToSTL(geometry: THREE.BufferGeometry): Uint8Array {
