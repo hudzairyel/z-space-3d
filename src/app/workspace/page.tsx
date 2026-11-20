@@ -1366,11 +1366,11 @@ export default function WorkspacePage() {
       </aside>
 
       {/* ═══ MAIN VIEWPORT (Meshy Style) ═══ */}
-      <main className={`flex-1 relative overflow-hidden bg-black transition-all duration-200 ${showMobilePanel && typeof window !== 'undefined' ? 'opacity-0 pointer-events-none md:opacity-100 md:pointer-events-auto' : ''}`}>
+      <main className="flex-1 relative overflow-hidden bg-black">
 
         {/* Mobile Panel Overlay */}
         {showMobilePanel && (
-          <div className="md:hidden fixed inset-0 z-40 bg-[#0d0d0d] flex flex-col overflow-hidden">
+          <div className="md:hidden fixed inset-0 bottom-14 z-40 bg-[#0d0d0d] flex flex-col overflow-hidden">
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-[#0d0d0d] flex-shrink-0">
               <span className="text-xs font-bold uppercase tracking-wider text-white">
                 {mobileTab === "image" && "Image to 3D"}
