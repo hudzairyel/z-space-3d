@@ -1125,6 +1125,11 @@ export default function WorkspacePage() {
 
   const [showMobilePanel, setShowMobilePanel] = useState(false);
 
+  const openMobileTab = (tab: any) => {
+    setMobileTab(tab);
+    setShowMobilePanel(true);
+  };
+
   return (
     <div className="flex h-screen w-screen bg-black text-white select-none overflow-hidden">
 
@@ -1650,26 +1655,26 @@ export default function WorkspacePage() {
 
         {/* Mobile Bottom Tab Bar */}
         <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-zinc-900/95 backdrop-blur-xl border-t border-white/10 flex items-center justify-around px-2 py-2">
-          <button onClick={() => { setMobileTab("image"); setShowMobilePanel(true); }} className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] transition-all ${mobileTab === "image" && showMobilePanel ? "text-white" : "text-zinc-500"}`}>
+          <button onClick={() => openMobileTab("image")} className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] transition-all ${mobileTab === "image" && showMobilePanel ? "text-white" : "text-zinc-500"}`}>
             <ImageIcon size={18} />
             <span>Image</span>
           </button>
-          <button onClick={() => { setMobileTab("model"); setShowMobilePanel(true); }} className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] transition-all ${mobileTab === "model" && showMobilePanel ? "text-white" : "text-zinc-500"}`}>
+          <button onClick={() => openMobileTab("model")} className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] transition-all ${mobileTab === "model" && showMobilePanel ? "text-white" : "text-zinc-500"}`}>
             <Box size={18} />
             <span>Model</span>
           </button>
           <button
             onClick={() => setShowMobilePanel(!showMobilePanel)}
-            className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] transition-all ${showMobilePanel && mobileTab === "model" ? "text-white" : "text-zinc-500"}`}
+            className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] transition-all ${showMobilePanel ? "text-white" : "text-zinc-500"}`}
           >
             <Settings size={18} />
             <span>Settings</span>
           </button>
-          <button onClick={() => { setMobileTab("animate"); setShowMobilePanel(true); }} className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] transition-all ${mobileTab === "animate" && showMobilePanel ? "text-white" : "text-zinc-500"}`}>
+          <button onClick={() => openMobileTab("animate")} className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] transition-all ${mobileTab === "animate" && showMobilePanel ? "text-white" : "text-zinc-500"}`}>
             <Zap size={18} />
             <span>Anim</span>
           </button>
-          <button onClick={() => { setMobileTab("assets"); setShowMobilePanel(true); }} className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] transition-all ${mobileTab === "assets" && showMobilePanel ? "text-white" : "text-zinc-500"}`}>
+          <button onClick={() => openMobileTab("assets")} className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] transition-all ${mobileTab === "assets" && showMobilePanel ? "text-white" : "text-zinc-500"}`}>
             <Layers size={18} />
             <span>Export</span>
           </button>
