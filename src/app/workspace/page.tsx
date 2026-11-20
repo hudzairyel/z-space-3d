@@ -1127,16 +1127,9 @@ export default function WorkspacePage() {
 
   return (
     <div className="flex h-screen w-screen bg-black text-white select-none overflow-hidden">
-      {/* ═══ MOBILE TOGGLE ═══ */}
-      <button 
-        onClick={() => setShowMobilePanel(!showMobilePanel)}
-        className="md:hidden absolute top-4 left-4 z-50 p-2 bg-zinc-900/80 rounded-lg border border-white/10"
-      >
-        {showMobilePanel ? <X size={20} /> : <Settings size={20} />}
-      </button>
 
-      {/* ═══ NAVIGATION RAIL (Responsive) ═══ */}
-      <nav className={`${showMobilePanel ? "hidden" : "flex"} md:flex w-16 bg-[#0a0a0a] border-r border-white/10 flex-col items-center py-5 gap-6 z-20 flex-shrink-0`}>
+      {/* ═══ NAV RAIL (Desktop only) ═══ */}
+      <nav className="hidden md:flex w-16 bg-[#0a0a0a] border-r border-white/10 flex-col items-center py-5 gap-6 z-20 flex-shrink-0">
         <Link href="/" className="group">
           <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:scale-105 transition-all">
             <img src="/logo.png" alt="Z" className="w-5 h-5 object-contain" />
@@ -1165,8 +1158,8 @@ export default function WorkspacePage() {
         </div>
       </nav>
 
-      {/* ═══ TASK-ORIENTED SIDEBAR (Responsive) ═══ */}
-      <aside className={`${showMobilePanel ? "fixed inset-0 z-40 bg-[#0d0d0d]" : "hidden md:flex"} w-80 border-r border-white/10 flex-col flex-shrink-0`}>
+      {/* ═══ SETTINGS SIDEBAR (Desktop) / Overlay (Mobile) ═══ */}
+      <aside className="hidden md:flex w-80 bg-[#0d0d0d] border-r border-white/10 flex-col flex-shrink-0">
         <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between">
           <span className="text-xs font-bold uppercase tracking-wider text-white">
             {mobileTab === "image" && "Image to 3D"}
@@ -1176,8 +1169,7 @@ export default function WorkspacePage() {
           </span>
           <span className="text-[10px] text-zinc-500 bg-white/5 px-2 py-0.5 rounded border border-white/10">Z-Space</span>
         </div>
-
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 pt-16 md:pt-4">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {mobileTab === "image" && (
             <>
               <Card title="Source Image" icon={Sparkles}>
@@ -1370,6 +1362,199 @@ export default function WorkspacePage() {
 
       {/* ═══ MAIN VIEWPORT (Meshy Style) ═══ */}
       <main className="flex-1 relative overflow-hidden bg-black">
+
+        {/* Mobile Settings Overlay */}
+        {showMobilePanel && (
+          <div className="md:hidden fixed inset-0 z-40 bg-[#0d0d0d] overflow-y-auto">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 sticky top-0 bg-[#0d0d0d] z-10">
+              <span className="text-xs font-bold uppercase tracking-wider text-white">
+                {mobileTab === "image" && "Image to 3D"}
+                {mobileTab === "model" && "3D Model Settings"}
+                {mobileTab === "animate" && "Animation Studio"}
+                {mobileTab === "assets" && "My Assets"}
+              </span>
+              <button onClick={() => setShowMobilePanel(false)} className="p-1.5 rounded-full hover:bg-white/10">
+                <X size={18} />
+              </button>
+            </div>
+            <div className="p-4 space-y-4 pb-20">
+              {mobileTab === "image" && (
+                <>
+                  <Card title="Source Image" icon={Sparkles}>
+                    <div className="space-y-3">
+                      <label className="flex flex-col items-center gap-2 border-2 border-dashed border-white/15 rounded-xl p-6 cursor-pointer hover:border-white/30 transition-colors bg-white/[0.02]">
+                        <input type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
+                        {imageUrl ? (
+                          <img src={imageUrl} alt="Preview" className="max-h-32 rounded-lg object-contain" />
+                        ) : (
+                          <>
+                            <Upload size={24} className="text-gray-400" />
+                            <span className="text-xs text-gray-400 text-center">Upload concept art or image</span>
+                          </>
+                        )}
+                      </label>
+                      {imageUrl && (
+                        <button
+                          onClick={handleGenerate}
+                          disabled={isGenerating}
+                          className="w-full py-2.5 bg-white text-black hover:bg-gray-200 rounded-lg text-sm font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+                        >
+                          {isGenerating ? <RotateCw size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                          {isGenerating ? "Generating..." : "Generate 3D"}
+                        </button>
+                      )}
+                    </div>
+                  </Card>
+                  <Card title="Stylization" icon={Palette}>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      {["Realistic", "Stylized", "Low Poly", "Anime"].map((st) => (
+                        <button
+                          key={st}
+                          onClick={() => setStylization(st)}
+                          className={`p-2 border rounded-lg hover:border-white/30 text-left bg-white/5 transition-all ${
+                            stylization === st ? "border-white bg-white/20" : "border-white/10"
+                          }`}
+                        >
+                          <div className="font-bold text-gray-200">{st}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </Card>
+                </>
+              )}
+
+              {mobileTab === "model" && (
+                <>
+                  <Card title="Material & Shader" icon={Layers}>
+                    <div className="grid grid-cols-3 gap-2">
+                      {materialOptions.map((opt) => (
+                        <button
+                          key={opt.key}
+                          onClick={() => setMaterialPreset(opt.key)}
+                          className={`py-2 text-[10px] font-bold rounded-lg border transition-all ${
+                            materialPreset === opt.key
+                              ? "bg-white text-black border-white"
+                              : "bg-white/5 border-white/10 text-gray-400 hover:text-white hover:border-white/30"
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                    {materialPreset === "image" && (
+                      <div className="space-y-3 pt-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-zinc-400">Texture Map</span>
+                          <Toggle checked={useTexture} onChange={setUseTexture} />
+                        </div>
+                        {useTexture && (
+                          <Slider label="Opacity" value={textureOpacity} min={0} max={1} step={0.05} onChange={setTextureOpacity} display={`${Math.round(textureOpacity * 100)}%`} />
+                        )}
+                      </div>
+                    )}
+                  </Card>
+                  <Card title="Mesh Optimization" icon={Settings}>
+                    <div className="space-y-4">
+                      <Slider label="Depth" value={depthScale} min={0.1} max={1.0} step={0.05} onChange={setDepthScale} display={depthScale.toFixed(2)} />
+                      <Slider label="Resolution" value={gridSize} min={64} max={256} step={32} onChange={setGridSize} display={gridSize.toString()} />
+                      <Slider label="Smoothness" value={smoothness} min={0} max={80} step={1} onChange={setSmoothness} display={smoothness.toString()} />
+                      <div className="space-y-1.5 pt-1">
+                        <span className="text-xs text-zinc-400 block">Smart Topology (Remesh)</span>
+                        <div className="grid grid-cols-3 gap-1.5">
+                          {(["low", "medium", "high"] as const).map((lvl) => (
+                            <button
+                              key={lvl}
+                              onClick={() => setRemeshLevel(lvl)}
+                              className={`py-1.5 rounded-lg border text-center transition-all ${
+                                remeshLevel === lvl
+                                  ? "bg-white text-black font-bold border-white"
+                                  : "bg-white/5 border-white/10 text-gray-400 hover:text-white"
+                              }`}
+                            >
+                              <span className="text-[10px] uppercase font-bold">{lvl}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                </>
+              )}
+
+              {mobileTab === "animate" && (
+                <Card title="Animation Tracks" icon={Zap}>
+                  <div className="space-y-3">
+                    <span className="text-[10px] text-zinc-500 block">Stack motion layers on imported mesh:</span>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {animationOptions.map((opt) => {
+                        const on = animStack.includes(opt.key) || (animStack.length === 0 && animationMode === opt.key);
+                        return (
+                          <button
+                            key={opt.key}
+                            onClick={() => {
+                              if (opt.key === "none") {
+                                setAnimStack([]);
+                                setAnimationMode("none");
+                                return;
+                              }
+                              setAnimStack((prev) => {
+                                const next = prev.includes(opt.key)
+                                  ? prev.filter((k) => k !== opt.key)
+                                  : [...prev.filter((k) => k !== "none"), opt.key];
+                                setAnimationMode((next[0] as typeof animationMode) || "none");
+                                return next;
+                              });
+                            }}
+                            className={`py-2 rounded-md text-[10px] font-bold border transition-all ${
+                              on ? "bg-white text-black border-white" : "bg-white/5 border-white/10 text-gray-400 hover:text-white"
+                            }`}
+                          >
+                            {opt.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </Card>
+              )}
+
+              {mobileTab === "assets" && (
+                <Card title="Export & History" icon={Download}>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-3 gap-1.5">
+                      {(["glb", "obj", "stl"] as const).map((type) => (
+                        <button
+                          key={type}
+                          onClick={() => download(type)}
+                          disabled={!geometry}
+                          className="py-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 rounded-lg text-xs font-bold border border-zinc-700"
+                        >
+                          .{type.toUpperCase()}
+                        </button>
+                      ))}
+                      <button
+                        onClick={downloadFbx}
+                        disabled={!geometry}
+                        className="py-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 rounded-lg text-xs font-bold border border-zinc-700"
+                      >
+                        .FBX
+                      </button>
+                      <button
+                        onClick={() => !gifBusy && downloadGif()}
+                        disabled={!geometry}
+                        className="col-span-2 py-2 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 rounded-lg text-xs font-bold border border-zinc-700 flex items-center justify-center gap-1.5"
+                      >
+                        {gifBusy && <Loader2 size={12} className="animate-spin" />}
+                        {gifBusy ? "Recording..." : "GIF Loop"}
+                      </button>
+                    </div>
+                  </div>
+                </Card>
+              )}
+            </div>
+          </div>
+        )}
+
         <Canvas
           shadows
           camera={{ position: [0, 0, 4], fov: 45 }}
@@ -1435,8 +1620,8 @@ export default function WorkspacePage() {
           />
         </Canvas>
 
-        {/* Floating Toolbar (Meshy 3.0 Layout) */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-zinc-900/90 backdrop-blur-xl border border-white/10 rounded-full px-3 py-1.5 z-20 shadow-2xl">
+        {/* Desktop Floating Toolbar */}
+        <div className="hidden md:flex absolute bottom-6 left-1/2 -translate-x-1/2 items-center gap-1.5 bg-zinc-900/90 backdrop-blur-xl border border-white/10 rounded-full px-3 py-1.5 z-20 shadow-2xl">
           <button 
             onClick={() => setAutoRotate(!autoRotate)} 
             className={`p-2 rounded-full transition-colors ${autoRotate ? "bg-white text-black" : "text-gray-400 hover:text-white"}`}
@@ -1458,6 +1643,33 @@ export default function WorkspacePage() {
             title="UV Checker"
           >
             <Layers size={15} />
+          </button>
+        </div>
+
+        {/* Mobile Bottom Tab Bar */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-zinc-900/95 backdrop-blur-xl border-t border-white/10 flex items-center justify-around px-2 py-2">
+          <button onClick={() => setMobileTab("image")} className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] transition-all ${mobileTab === "image" ? "text-white" : "text-zinc-500"}`}>
+            <ImageIcon size={18} />
+            <span>Image</span>
+          </button>
+          <button onClick={() => setMobileTab("model")} className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] transition-all ${mobileTab === "model" ? "text-white" : "text-zinc-500"}`}>
+            <Box size={18} />
+            <span>Model</span>
+          </button>
+          <button
+            onClick={() => setShowMobilePanel(!showMobilePanel)}
+            className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] transition-all ${showMobilePanel ? "text-white" : "text-zinc-500"}`}
+          >
+            <Settings size={18} />
+            <span>Settings</span>
+          </button>
+          <button onClick={() => setMobileTab("animate")} className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] transition-all ${mobileTab === "animate" ? "text-white" : "text-zinc-500"}`}>
+            <Zap size={18} />
+            <span>Anim</span>
+          </button>
+          <button onClick={() => setMobileTab("assets")} className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] transition-all ${mobileTab === "assets" ? "text-white" : "text-zinc-500"}`}>
+            <Layers size={18} />
+            <span>Export</span>
           </button>
         </div>
       </main>
