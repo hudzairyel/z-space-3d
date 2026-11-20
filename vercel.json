@@ -1,0 +1,7 @@
+{
+  "version": 2,
+  "name": "z-space-3d",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "framework": "nextjs"
+}
