@@ -136,7 +136,7 @@ export default function Navbar() {
 
             {/* Discord */}
             <a
-              href="https://discord.gg/1477965133882986618"
+              href="https://discord.gg/Qa8UMEJeHF"
               target="_blank"
               rel="noopener noreferrer"
               className="hidden sm:flex p-2 hover:bg-white/10 rounded-full transition-colors text-gray-400 hover:text-[#5865F2] border border-transparent hover:border-white/10"
