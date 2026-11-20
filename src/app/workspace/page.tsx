@@ -1123,10 +1123,20 @@ export default function WorkspacePage() {
     { key: "transparent", label: "Clear", icon: <Eye size={12} /> },
   ];
 
+  const [showMobilePanel, setShowMobilePanel] = useState(false);
+
   return (
-    <div className="flex h-screen w-screen bg-black text-white select-none">
-      {/* ═══ MESHY-STYLE NAVIGATION RAIL ═══ */}
-      <nav className="w-16 bg-[#0a0a0a] border-r border-white/10 flex flex-col items-center py-5 gap-6 z-20 flex-shrink-0">
+    <div className="flex h-screen w-screen bg-black text-white select-none overflow-hidden">
+      {/* ═══ MOBILE TOGGLE ═══ */}
+      <button 
+        onClick={() => setShowMobilePanel(!showMobilePanel)}
+        className="md:hidden absolute top-4 left-4 z-50 p-2 bg-zinc-900/80 rounded-lg border border-white/10"
+      >
+        {showMobilePanel ? <X size={20} /> : <Settings size={20} />}
+      </button>
+
+      {/* ═══ NAVIGATION RAIL (Responsive) ═══ */}
+      <nav className={`${showMobilePanel ? "hidden" : "flex"} md:flex w-16 bg-[#0a0a0a] border-r border-white/10 flex-col items-center py-5 gap-6 z-20 flex-shrink-0`}>
         <Link href="/" className="group">
           <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:scale-105 transition-all">
             <img src="/logo.png" alt="Z" className="w-5 h-5 object-contain" />
@@ -1155,8 +1165,8 @@ export default function WorkspacePage() {
         </div>
       </nav>
 
-      {/* ═══ TASK-ORIENTED SIDEBAR ═══ */}
-      <aside className="w-80 bg-[#0d0d0d] border-r border-white/10 flex flex-col z-10 flex-shrink-0">
+      {/* ═══ TASK-ORIENTED SIDEBAR (Responsive) ═══ */}
+      <aside className={`${showMobilePanel ? "fixed inset-0 z-40 bg-[#0d0d0d]" : "hidden md:flex"} w-80 border-r border-white/10 flex-col flex-shrink-0`}>
         <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between">
           <span className="text-xs font-bold uppercase tracking-wider text-white">
             {mobileTab === "image" && "Image to 3D"}
@@ -1167,7 +1177,7 @@ export default function WorkspacePage() {
           <span className="text-[10px] text-zinc-500 bg-white/5 px-2 py-0.5 rounded border border-white/10">Z-Space</span>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 pt-16 md:pt-4">
           {mobileTab === "image" && (
             <>
               <Card title="Source Image" icon={Sparkles}>
