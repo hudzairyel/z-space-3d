@@ -727,7 +727,7 @@ export default function WorkspacePage() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [depthScale, setDepthScale] = useState(0.35);
-  const [gridSize, setGridSize] = useState(128);
+  const [gridSize, setGridSize] = useState(64);
   const [geometry, setGeometry] = useState<THREE.BufferGeometry | null>(null);
   const [wireframe, setWireframe] = useState(false);
   const [history, setHistory] = useState<Array<{ id: string; label: string; imageUrl?: string; time: string }>>([]);
@@ -1361,12 +1361,12 @@ export default function WorkspacePage() {
       </aside>
 
       {/* ═══ MAIN VIEWPORT (Meshy Style) ═══ */}
-      <main className="flex-1 relative overflow-hidden bg-black">
+      <main className={`flex-1 relative overflow-hidden bg-black transition-all duration-200 ${showMobilePanel && typeof window !== 'undefined' ? 'opacity-0 pointer-events-none md:opacity-100 md:pointer-events-auto' : ''}`}>
 
-        {/* Mobile Settings Overlay */}
+        {/* Mobile Panel Overlay */}
         {showMobilePanel && (
-          <div className="md:hidden fixed inset-0 z-40 bg-[#0d0d0d] overflow-y-auto">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 sticky top-0 bg-[#0d0d0d] z-10">
+          <div className="md:hidden fixed inset-0 z-40 bg-[#0d0d0d] flex flex-col overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-[#0d0d0d] flex-shrink-0">
               <span className="text-xs font-bold uppercase tracking-wider text-white">
                 {mobileTab === "image" && "Image to 3D"}
                 {mobileTab === "model" && "3D Model Settings"}
@@ -1377,22 +1377,24 @@ export default function WorkspacePage() {
                 <X size={18} />
               </button>
             </div>
-            <div className="p-4 space-y-4 pb-20">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {mobileTab === "image" && (
                 <>
                   <Card title="Source Image" icon={Sparkles}>
                     <div className="space-y-3">
-                      <label className="flex flex-col items-center gap-2 border-2 border-dashed border-white/15 rounded-xl p-6 cursor-pointer hover:border-white/30 transition-colors bg-white/[0.02]">
-                        <input type="file" accept="image/*" className="hidden" onChange={handleFileUpload} />
-                        {imageUrl ? (
-                          <img src={imageUrl} alt="Preview" className="max-h-32 rounded-lg object-contain" />
-                        ) : (
-                          <>
-                            <Upload size={24} className="text-gray-400" />
-                            <span className="text-xs text-gray-400 text-center">Upload concept art or image</span>
-                          </>
-                        )}
-                      </label>
+                      <div className="relative w-full min-h-[120px]">
+                        <label className="flex flex-col items-center gap-2 border-2 border-dashed border-white/15 rounded-xl p-6 cursor-pointer hover:border-white/30 transition-colors bg-white/[0.02] min-h-[120px] justify-center w-full relative">
+                          <input type="file" accept="image/*" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 m-0 p-0" onChange={handleFileUpload} />
+                          {imageUrl ? (
+                            <img src={imageUrl} alt="Preview" className="max-h-32 rounded-lg object-contain pointer-events-none" />
+                          ) : (
+                            <>
+                              <Upload size={24} className="text-gray-400 pointer-events-none" />
+                              <span className="text-xs text-gray-400 text-center pointer-events-none">Upload concept art or image</span>
+                            </>
+                          )}
+                        </label>
+                      </div>
                       {imageUrl && (
                         <button
                           onClick={handleGenerate}
@@ -1558,7 +1560,7 @@ export default function WorkspacePage() {
         <Canvas
           shadows
           camera={{ position: [0, 0, 4], fov: 45 }}
-          dpr={[1, 2]}
+          dpr={[1, 1.5]}
         >
           <color attach="background" args={["#050505"]} />
           <ambientLight intensity={0.5} color="#ffffff" />
@@ -1648,26 +1650,26 @@ export default function WorkspacePage() {
 
         {/* Mobile Bottom Tab Bar */}
         <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-zinc-900/95 backdrop-blur-xl border-t border-white/10 flex items-center justify-around px-2 py-2">
-          <button onClick={() => setMobileTab("image")} className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] transition-all ${mobileTab === "image" ? "text-white" : "text-zinc-500"}`}>
+          <button onClick={() => { setMobileTab("image"); setShowMobilePanel(true); }} className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] transition-all ${mobileTab === "image" && showMobilePanel ? "text-white" : "text-zinc-500"}`}>
             <ImageIcon size={18} />
             <span>Image</span>
           </button>
-          <button onClick={() => setMobileTab("model")} className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] transition-all ${mobileTab === "model" ? "text-white" : "text-zinc-500"}`}>
+          <button onClick={() => { setMobileTab("model"); setShowMobilePanel(true); }} className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] transition-all ${mobileTab === "model" && showMobilePanel ? "text-white" : "text-zinc-500"}`}>
             <Box size={18} />
             <span>Model</span>
           </button>
           <button
             onClick={() => setShowMobilePanel(!showMobilePanel)}
-            className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] transition-all ${showMobilePanel ? "text-white" : "text-zinc-500"}`}
+            className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] transition-all ${showMobilePanel && mobileTab === "model" ? "text-white" : "text-zinc-500"}`}
           >
             <Settings size={18} />
             <span>Settings</span>
           </button>
-          <button onClick={() => setMobileTab("animate")} className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] transition-all ${mobileTab === "animate" ? "text-white" : "text-zinc-500"}`}>
+          <button onClick={() => { setMobileTab("animate"); setShowMobilePanel(true); }} className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] transition-all ${mobileTab === "animate" && showMobilePanel ? "text-white" : "text-zinc-500"}`}>
             <Zap size={18} />
             <span>Anim</span>
           </button>
-          <button onClick={() => setMobileTab("assets")} className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] transition-all ${mobileTab === "assets" ? "text-white" : "text-zinc-500"}`}>
+          <button onClick={() => { setMobileTab("assets"); setShowMobilePanel(true); }} className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-[10px] transition-all ${mobileTab === "assets" && showMobilePanel ? "text-white" : "text-zinc-500"}`}>
             <Layers size={18} />
             <span>Export</span>
           </button>
